@@ -19,7 +19,7 @@ import { LitElement } from 'lit';
 
 class MyApp extends LitElment {
   i18nInit = i18next.init({
-     // ...options
+     ...options
   });
 
   protected async performUpdate(): Promise<unknown> {
@@ -40,7 +40,7 @@ import { LitElement, html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('my-element')
-@localized()
+@localized({...options})
 class MyElement extends LitElement {
   protected render(): TemplateResult {
     return html`<b>${t('path.to.translation_key')}</b>`;
@@ -57,7 +57,9 @@ import { LitElement, html } from 'lit';
 class MyElement extends LitElement {
   constructor() {
     super();
-    updateWhenLocaleChanges(this);
+    updateWhenLocaleChanges(this, {
+        ...options
+    });
   }
 
   render() {
@@ -66,6 +68,16 @@ class MyElement extends LitElement {
 }
 customElements.define('my-element', MyElement);
 ```
+
+#### Options
+Options can be passed optionally to the `localized` decorator or the `updateWhenLocaleChanges` callback.
+```ts
+type Event = 'added' | 'initialized' | 'languageChanged' | 'loaded';
+type LocalizeOptions = {
+    event?: Event | Event[]; // Event or events which will trigger a rerender
+};
+```
+
 
 ## License
 

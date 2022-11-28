@@ -4,28 +4,41 @@
  * SPDX-License-Identifier: MIT License
  */
 
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
-import { i18next } from './localized-helpers';
+import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
+import { default as i18next } from 'i18next';
 
-class LocalizeController implements ReactiveController {
+type Event = 'added' | 'initialized' | 'languageChanged' | 'loaded';
+
+export type LocalizeOptions = {
+    event?: Event | Event[];
+}
+
+export class LocalizeController implements ReactiveController {
+    public static readonly events: ReadonlyArray<Event> = ['languageChanged'];
+
     public readonly host: ReactiveControllerHost;
 
+    private readonly events: ReadonlyArray<Event>;
     private readonly localizeEventHandler = () => this.host.requestUpdate();
 
-    constructor(host: ReactiveControllerHost) {
+    constructor(host: ReactiveControllerHost, options?: LocalizeOptions) {
         this.host = host;
+
+        const events = options?.event !== undefined ? options.event : LocalizeController.events;
+        this.events = typeof events === 'string' ? [events] : events;
     }
 
     hostConnected() {
-        if(!i18next.isInitialized) {
-            i18next.on('initialized', this.localizeEventHandler);
+        for (const event of this.events) {
+            if (event == 'initialized' && i18next.isInitialized) continue;
+            i18next.on(event, this.localizeEventHandler);
         }
-        i18next.on('languageChanged', this.localizeEventHandler);
     }
 
     hostDisconnected() {
-        i18next.off('initialized', this.localizeEventHandler)
-        i18next.off('languageChanged', this.localizeEventHandler);
+        for (const event of this.events) {
+            i18next.off(event, this.localizeEventHandler);
+        }
     }
 }
 
@@ -34,25 +47,20 @@ class LocalizeController implements ReactiveController {
  *
  * See also {@link localized} for the same functionality as a decorator.
  *
-  * Usage:
+ * ```js
+ * import { LitElement, html } from 'lit';
+ * import { t, updateWhenLocaleChanges } from '@weavedev/lit-i18next';
  *
- *   import { LitElement, html } from 'lit';
- *   import { t, updateWhenLocaleChanges } from '@weavedev/lit-i18next';
- *
- *   class MyElement extends LitElement {
- *     constructor() {
- *       super();
- *       updateWhenLocaleChanges(this);
- *     }
- *
- *     render() {
- *       return html`<b>${t('key.path')}</b>`;
- *     }
+ * class MyElement extends LitElement {
+ *   constructor() {
+ *     super();
+ *     updateWhenLocaleChanges(this);
  *   }
+ *
+ *   render() {
+ *     return html`<b>${t('key.path')}</b>`;
+ *   }
+ * }
  */
-const _updateWhenLocaleChanges = (host: ReactiveControllerHost) =>
-    host.addController(new LocalizeController(host));
-
-export const updateWhenLocaleChanges: typeof _updateWhenLocaleChanges & {
-    _LIT_I18NEXT_LOCALIZE_CONTROLLER_FN_?: never;
-} = _updateWhenLocaleChanges;
+export const updateWhenLocaleChanges = (host: ReactiveControllerHost, options?: LocalizeOptions) =>
+    host.addController(new LocalizeController(host, options));
