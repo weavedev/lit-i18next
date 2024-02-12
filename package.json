@@ -1,6 +1,6 @@
 {
   "name": "@weavedev/lit-i18next",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0-rc.1",
   "description": "i18next implementation for Lit",
   "scripts": {
     "prepare": "tsc"
@@ -32,10 +32,11 @@
   },
   "homepage": "https://github.com/weavedev/lit-i18next#readme",
   "peerDependencies": {
-    "@lit/reactive-element": "^1.0.0",
+    "@lit/reactive-element": "^1.0.0 || ^2.0.0",
     "i18next": ">=19.5.0 < 23.0.0"
   },
   "devDependencies": {
-    "typescript": "~4.3.5"
+    "@lit/reactive-element": "^2.0.0",
+    "typescript": "~5.3.3"
   }
 }
