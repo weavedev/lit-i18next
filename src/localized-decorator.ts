@@ -5,8 +5,26 @@
  */
 
 import type { ReactiveElement } from '@lit/reactive-element';
-import type { ClassDescriptor } from '@lit/reactive-element/decorators/base';
+import type { Constructor } from '@lit/reactive-element/decorators/base';
 import { LocalizeOptions, updateWhenLocaleChanges } from './localized-controller';
+
+// From the TC39 Decorators proposal
+interface ClassDescriptor {
+    kind: 'class';
+    elements: ClassElement[];
+    finisher?: <T>(clazz: Constructor<T>) => void | Constructor<T>;
+}
+
+// From the TC39 Decorators proposal
+interface ClassElement {
+    kind: 'field' | 'method';
+    key: PropertyKey;
+    placement: 'static' | 'prototype' | 'own';
+    initializer?: Function;
+    extras?: ClassElement[];
+    finisher?: <T>(clazz: Constructor<T>) => void | Constructor<T>;
+    descriptor?: PropertyDescriptor;
+}
 
 /**
  * Class decorator to enable re-rendering the given LitElement whenever a new
